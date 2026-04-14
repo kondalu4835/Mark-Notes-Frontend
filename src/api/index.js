@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// ✅ FIX: backend already has /api in routes, so we add it here
+const BASE_URL = `${process.env.REACT_APP_API_URL}/api`;
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -10,7 +11,9 @@ const api = axios.create({
 // Attach token on every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -27,14 +30,18 @@ api.interceptors.response.use(
   }
 );
 
-// Auth
+// =======================
+// AUTH APIs
+// =======================
 export const authApi = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   me: () => api.get('/auth/me')
 };
 
-// Notes
+// =======================
+// NOTES APIs
+// =======================
 export const notesApi = {
   list: (params) => api.get('/notes', { params }),
   get: (id) => api.get(`/notes/${id}`),
@@ -42,10 +49,13 @@ export const notesApi = {
   update: (id, data) => api.put(`/notes/${id}`, data),
   delete: (id) => api.delete(`/notes/${id}`),
   getVersions: (id) => api.get(`/notes/${id}/versions`),
-  restoreVersion: (noteId, versionId) => api.post(`/notes/${noteId}/restore/${versionId}`)
+  restoreVersion: (noteId, versionId) =>
+    api.post(`/notes/${noteId}/restore/${versionId}`)
 };
 
-// Tags
+// =======================
+// TAG APIs
+// =======================
 export const tagsApi = {
   list: () => api.get('/tags'),
   create: (data) => api.post('/tags', data),
